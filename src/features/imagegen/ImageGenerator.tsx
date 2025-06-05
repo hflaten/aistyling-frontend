@@ -1,13 +1,20 @@
 import { useState } from "react";
-import axios from "axios";
+import { generateImage } from "../../services/api";
+import { formatError } from "../../shared/utils/formatError";
+import PromptBuilder from "../../components/PromptBuilder";
+import UserImageUploader from "../../components/UserImageUploader";
+import ProductImageUploader from "../../components/ProductImageUploader";
 
 export default function ImageGenerator() {
   const [prompt, setPrompt] = useState("");
+  const [autoPrompt, setAutoPrompt] = useState<string | undefined>();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userImage, setUserImage] = useState<File | null>(null);
+  const [productImage, setProductImage] = useState<File | null>(null);
 
-  const generateImage = async () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError("Prompt cannot be empty.");
       return;
@@ -18,18 +25,11 @@ export default function ImageGenerator() {
     setImageUrls([]);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/generate`, {
-        prompt,
-      });
-
-      if (!response.data.image_urls || !Array.isArray(response.data.image_urls)) {
-        throw new Error("Invalid response format");
-      }
-
-      setImageUrls(response.data.image_urls);
+      const urls = await generateImage(prompt, userImage ?? undefined, productImage ?? undefined);
+      setImageUrls(urls);
     } catch (err: any) {
       console.error("Image generation error:", err);
-      setError(err?.response?.data?.detail || "An unexpected error occurred.");
+      setError(formatError(err));
     } finally {
       setLoading(false);
     }
@@ -40,16 +40,13 @@ export default function ImageGenerator() {
       <div className="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-xl space-y-4">
         <h1 className="text-3xl font-bold text-center">AI Styling Generator</h1>
 
-        <input
-          type="text"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter your image prompt"
-          className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
+        <PromptBuilder prompt={prompt} onPromptChange={setPrompt} autoPrompt={autoPrompt} />
+
+        <UserImageUploader onImageSelect={setUserImage} />
+        <ProductImageUploader onImageSelect={setProductImage} />
 
         <button
-          onClick={generateImage}
+          onClick={handleGenerate}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-xl transition"
           disabled={loading}
         >
