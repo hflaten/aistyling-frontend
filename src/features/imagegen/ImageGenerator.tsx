@@ -20,12 +20,17 @@ export default function ImageGenerator() {
       return;
     }
 
+    if (!userImage || !productImage) {
+      setError("Please upload both your photo and a product image.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setImageUrls([]);
 
     try {
-      const urls = await generateImage(prompt, userImage ?? undefined, productImage ?? undefined);
+      const urls = await generateImage(prompt, userImage, productImage);
       setImageUrls(urls);
     } catch (err: any) {
       console.error("Image generation error:", err);

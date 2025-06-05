@@ -7,8 +7,13 @@ export async function generateImage(
 ): Promise<string[]> {
   const formData = new FormData();
   formData.append("prompt", prompt);
-  if (userImage) formData.append("user_image", userImage);
-  if (productImage) formData.append("product_image", productImage);
+
+  if (!userImage || !productImage) {
+    throw new Error("Both userImage and productImage are required.");
+  }
+
+  formData.append("image", userImage);
+  formData.append("context_image", productImage);
 
   const response = await axios.post(
     `${import.meta.env.VITE_API_URL}/generate`,
