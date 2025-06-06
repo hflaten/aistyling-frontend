@@ -1,27 +1,32 @@
-import { useState } from "react";
-import { generateImage } from "../../services/api";
-import { formatError } from "../../shared/utils/formatError";
+import { useState, useEffect } from "react";
+
 import PromptBuilder from "../../components/PromptBuilder";
 import UserImageUploader from "../../components/UserImageUploader";
 import ProductImageUploader from "../../components/ProductImageUploader";
+import { generateImage } from "../../services/api";
+import { formatError } from "../../shared/utils/formatError";
 
 export default function ImageGenerator() {
   const [prompt, setPrompt] = useState("");
-  const [autoPrompt, setAutoPrompt] = useState<string | undefined>();
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [autoPrompt, setAutoPrompt] = useState("");
   const [userImage, setUserImage] = useState<File | null>(null);
   const [productImage, setProductImage] = useState<File | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (productImage) {
+      // Eksempel på automatisk generert prompt basert på produktbilde
+      setAutoPrompt("Minimalistisk sommerantrekk i bymiljø");
+    }
+  }, [productImage]);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      setError("Prompt cannot be empty.");
-      return;
-    }
+    const finalPrompt = prompt.trim() !== "" ? prompt : autoPrompt;
 
-    if (!userImage || !productImage) {
-      setError("Please upload both your photo and a product image.");
+    if (!finalPrompt) {
+      setError("Prompt cannot be empty.");
       return;
     }
 
@@ -30,7 +35,7 @@ export default function ImageGenerator() {
     setImageUrls([]);
 
     try {
-      const urls = await generateImage(prompt, userImage, productImage);
+      const urls = await generateImage(finalPrompt, userImage ?? undefined, productImage ?? undefined);
       setImageUrls(urls);
     } catch (err: any) {
       console.error("Image generation error:", err);
@@ -41,37 +46,30 @@ export default function ImageGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-xl space-y-4">
-        <h1 className="text-3xl font-bold text-center">AI Styling Generator</h1>
+    <div className="space-y-6">
+      <PromptBuilder prompt={prompt} setPrompt={setPrompt} />
+      <UserImageUploader onImageSelect={setUserImage} />
+      <ProductImageUploader onImageSelect={setProductImage} />
 
-        <PromptBuilder prompt={prompt} onPromptChange={setPrompt} autoPrompt={autoPrompt} />
+      <button
+        onClick={handleGenerate}
+        className="px-6 py-3 text-white bg-black rounded-xl hover:bg-gray-800"
+        disabled={loading}
+      >
+        {loading ? "Generating..." : "Generate Image"}
+      </button>
 
-        <UserImageUploader onImageSelect={setUserImage} />
-        <ProductImageUploader onImageSelect={setProductImage} />
+      {error && <div className="text-red-500 font-medium">{error}</div>}
 
-        <button
-          onClick={handleGenerate}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-xl transition"
-          disabled={loading}
-        >
-          {loading ? "Generating..." : "Generate Image"}
-        </button>
-
-        {error && <p className="text-red-500 text-center">{error}</p>}
-
-        {imageUrls.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {imageUrls.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Generated ${index + 1}`}
-                className="rounded-xl border shadow"
-              />
-            ))}
-          </div>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {imageUrls.map((url, index) => (
+          <img
+            key={index}
+            src={url}
+            alt={`Generated result ${index + 1}`}
+            className="w-full rounded-xl border"
+          />
+        ))}
       </div>
     </div>
   );

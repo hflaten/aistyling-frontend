@@ -1,11 +1,9 @@
-import { ChangeEvent } from "react";
-
 type ProductImageUploaderProps = {
   onImageSelect: (file: File | null) => void;
 };
 
 export default function ProductImageUploader({ onImageSelect }: ProductImageUploaderProps) {
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     onImageSelect(file);
   };
