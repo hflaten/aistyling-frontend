@@ -38,8 +38,17 @@ export default function ImageGenerator() {
       const urls = await generateImage(finalPrompt, userImage ?? undefined, productImage ?? undefined);
       setImageUrls(urls);
     } catch (err: any) {
-      console.error("Image generation error:", err);
-      setError(formatError(err));
+      console.error("Image generation error:", {
+        message: err?.message,
+        status: err?.response?.status,
+        data: err?.response?.data,
+        config: err?.config,
+      });
+      setError(
+        err?.response?.data?.detail ||
+        err?.message ||
+        "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }
