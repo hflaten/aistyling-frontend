@@ -30,17 +30,14 @@ export default function ImageGenerator() {
     }
 
     const promptPrefix = `
-    Use the first image solely to preserve the user's face, posture, and body proportions.
-    Completely ignore the clothes in the first image.
-    Use the second image as the exact clothing item, including color, logo, texture, and fit.
-    Render the user wearing that clothing item in a highly photorealistic style.
-    The user's appearance must remain unchanged (face, hair, body, position).
-    Any style or setting described should only affect the environment or background — not the person or outfit.
-    `;
+Use the first image as the visual reference for the user's face, skin tone, body shape, and pose.
+Use the second image as the exact clothing item, preserving cut, fabric, texture, color, logo, and brand details.
+Do not modify or reinterpret the user's appearance or the clothing item.
+Render a realistic photo of the person from image 1 wearing the clothing from image 2.
+Place them in the following context or style:
+`;
 
-
-
-    const finalPrompt = promptPrefix + "\n" + userPrompt;
+    const finalPrompt = `${promptPrefix}${userPrompt}`;
 
     setLoading(true);
     setError(null);
