@@ -17,10 +17,12 @@ export default function ImageGenerator() {
 
   useEffect(() => {
     if (productImage) {
-      // Eksempel på automatisk generert prompt basert på produktbilde
-      setAutoPrompt("Minimalistisk sommerantrekk i bymiljø");
+      setAutoPrompt(
+        "Create a photorealistic full-body image of the same person in the user image, maintaining identical body proportions and face, wearing the exact same clothing item shown in the uploaded product image. Leave the environment or background open to user customization or imagination."
+      );
     }
   }, [productImage]);
+
 
   const handleGenerate = async () => {
     const finalPrompt = prompt.trim() !== "" ? prompt : autoPrompt;
