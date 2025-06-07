@@ -16,10 +16,10 @@ export default function ImageGenerator() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (productImage) {
-      setAutoPrompt("Urban summer outfit with clean lines");
+    if (productImage && prompt.trim() === "") {
+      setAutoPrompt("A photorealistic image of the user wearing the clothing item in a realistic setting");
     }
-  }, [productImage]);
+  }, [productImage, prompt]);
 
   const handleGenerate = async () => {
     const userPrompt = prompt.trim() !== "" ? prompt : autoPrompt;
